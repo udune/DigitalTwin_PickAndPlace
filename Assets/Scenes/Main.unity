@@ -591,6 +591,11 @@ MonoBehaviour:
   zAxis: {fileID: 1402731026214527550}
   gripper: {fileID: 1402731026214527549}
   warningPrefab: {fileID: 8246332739343790490, guid: 360054e08d214b34297ecd45fa6730be, type: 3}
+  zoomDistance: 1.5
+  cameraOffset: {x: 0.5, y: 0.3, z: 0.5}
+  autoReset: 1
+  errorDuration: 10
+  blinkTimes: 5
 --- !u!1 &1858901497
 GameObject:
   m_ObjectHideFlags: 0

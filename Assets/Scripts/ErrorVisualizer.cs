@@ -21,6 +21,7 @@ public class ErrorVisualizer : MonoBehaviour
     [Header("카메라 동작 설정")] 
     public float zoomDistance = 1.5f;
     public Vector3 cameraOffset = new Vector3(0.5f, 0.3f, 0.5f);
+    public bool autoReset = true;
     public float errorDuration = 10f;
     public int blinkTimes = 5;
 
@@ -31,6 +32,9 @@ public class ErrorVisualizer : MonoBehaviour
 
     private IEnumerator ErrorSequence(string location, string errorType, string message)
     {
+        Debug.Log(errorType);
+        Debug.Log(message);
+        
         Transform target = GetErrorLocation(location);
 
         if (target == null)
@@ -38,23 +42,30 @@ public class ErrorVisualizer : MonoBehaviour
             Debug.LogError($"Location not found: {location}");
             yield break;
         }
+        
+        Vector3 targetWorldPos = GetTargetCenter(target);
 
         if (currentWarning != null)
         {
             Destroy(currentWarning);
         }
         
-        currentWarning = Instantiate(warningPrefab, target.position, Quaternion.identity);
-        currentWarning.transform.SetParent(target);
+        currentWarning = Instantiate(warningPrefab, targetWorldPos, Quaternion.identity);
+        currentWarning.transform.SetParent(target, true);
 
-        errorCamera.transform.position = target.position + new Vector3(0.5f, 0.3f, 0.5f);
-        errorCamera.Target.LookAtTarget = target;
+        errorCamera.transform.position = targetWorldPos + cameraOffset;
+        errorCamera.transform.LookAt(targetWorldPos);
         errorCamera.Priority = 20;
 
         Renderer renderer = target.GetComponent<Renderer>();
         if (renderer != null)
         {
             StartCoroutine(BlinkEffect(renderer, Color.red, blinkTimes));
+        }
+
+        if (!autoReset)
+        {
+            yield break;
         }
         
         yield return new WaitForSeconds(errorDuration);
@@ -85,6 +96,37 @@ public class ErrorVisualizer : MonoBehaviour
             default: 
                 return null;
         }
+    }
+
+    private Vector3 GetTargetCenter(Transform target)
+    {
+        if (target.childCount == 0)
+        {
+            return target.position;
+        }
+        
+        Renderer[] renderers = target.GetComponentsInChildren<Renderer>();
+        if (renderers.Length == 0)
+        {
+            Vector3 sum = Vector3.zero;
+            int count = 0;
+            
+            foreach (Transform child in target)
+            {
+                sum += child.position;
+                count++;
+            }
+            
+            return count > 0 ? sum / count : target.position;
+        }
+
+        Bounds bounds = renderers[0].bounds;
+        for (int i = 1; i < renderers.Length; i++)
+        {
+            bounds.Encapsulate(renderers[i].bounds);
+        }
+        
+        return bounds.center;
     }
 
     private IEnumerator BlinkEffect(Renderer renderer, Color color, int times)
@@ -118,5 +160,35 @@ public class ErrorVisualizer : MonoBehaviour
         }
         
         errorCamera.Priority = 5;
+    }
+    
+    [ContextMenu("Test X-Axis Error")]
+    private void TestXAxisError()
+    {
+        ShowError("X-AXIS", "Error", "X축 리미트 오버");
+    }
+    
+    [ContextMenu("Test Y-Axis Error")]
+    private void TestYAxisError()
+    {
+        ShowError("Y-AXIS", "Warning", "Y축 과속 경고");
+    }
+    
+    [ContextMenu("Test Z-Axis Error")]
+    private void TestZAxisError()
+    {
+        ShowError("Z-AXIS", "Error", "Z축 안전 높이 미달");
+    }
+    
+    [ContextMenu("Test Gripper Error")]
+    private void TestGripperError()
+    {
+        ShowError("GRIPPER", "Warning", "진공 압력 부족");
+    }
+    
+    [ContextMenu("Clear Error")]
+    private void ClearErrorTest()
+    {
+        ClearError();
     }
 }
