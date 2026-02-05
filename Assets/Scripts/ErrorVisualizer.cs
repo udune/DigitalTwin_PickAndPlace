@@ -1,9 +1,14 @@
 using System.Collections;
+using TMPro;
 using Unity.Cinemachine;
 using UnityEngine;
 
 public class ErrorVisualizer : MonoBehaviour
 {
+    [Header("UI 설정")] 
+    public TextMeshProUGUI errorMessage;
+    public GameObject errorPanel;
+    
     [Header("카메라 설정")] 
     public CinemachineCamera mainCamera;
     public CinemachineCamera errorCamera;
@@ -14,27 +19,19 @@ public class ErrorVisualizer : MonoBehaviour
     public Transform zAxis;
     public Transform gripper;
 
-    [Header("시각 효과")] 
-    public GameObject warningPrefab;
-    private GameObject currentWarning;
-
     [Header("카메라 동작 설정")] 
-    public float zoomDistance = 1.5f;
     public Vector3 cameraOffset = new Vector3(0.5f, 0.3f, 0.5f);
     public bool autoReset = true;
     public float errorDuration = 10f;
-    public int blinkTimes = 5;
 
     public void ShowError(string location, string errorType, string message)
     {
+        StopAllCoroutines();
         StartCoroutine(ErrorSequence(location, errorType, message));
     }
 
     private IEnumerator ErrorSequence(string location, string errorType, string message)
     {
-        Debug.Log(errorType);
-        Debug.Log(message);
-        
         Transform target = GetErrorLocation(location);
 
         if (target == null)
@@ -45,23 +42,19 @@ public class ErrorVisualizer : MonoBehaviour
         
         Vector3 targetWorldPos = GetTargetCenter(target);
 
-        if (currentWarning != null)
+        if (errorPanel != null)
         {
-            Destroy(currentWarning);
+            errorPanel.SetActive(true);
+        }
+
+        if (errorMessage != null)
+        {
+            errorMessage.text = $"[<color=red>{errorType}</color>] {location}: {message}";
         }
         
-        currentWarning = Instantiate(warningPrefab, targetWorldPos, Quaternion.identity);
-        currentWarning.transform.SetParent(target, true);
-
         errorCamera.transform.position = targetWorldPos + cameraOffset;
         errorCamera.transform.LookAt(targetWorldPos);
         errorCamera.Priority = 20;
-
-        Renderer renderer = target.GetComponent<Renderer>();
-        if (renderer != null)
-        {
-            StartCoroutine(BlinkEffect(renderer, Color.red, blinkTimes));
-        }
 
         if (!autoReset)
         {
@@ -69,13 +62,7 @@ public class ErrorVisualizer : MonoBehaviour
         }
         
         yield return new WaitForSeconds(errorDuration);
-        
-        errorCamera.Priority = 5;
-        
-        if (currentWarning != null)
-        {
-            Destroy(currentWarning);
-        }
+        ClearError();
     }
 
     private Transform GetErrorLocation(string location)
@@ -152,11 +139,9 @@ public class ErrorVisualizer : MonoBehaviour
 
     private void ClearError()
     {
-        StopAllCoroutines();
-
-        if (currentWarning != null)
+        if (errorPanel != null)
         {
-            Destroy(currentWarning);
+            errorPanel.SetActive(false);
         }
         
         errorCamera.Priority = 5;
