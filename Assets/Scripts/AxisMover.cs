@@ -6,7 +6,7 @@ public class AxisMover : MonoBehaviour
     public Transform yAxis;
     public Transform zAxis;
     
-    public float speed = 0.5f;
+    public float speed = 2.0f;
     
     void Update()
     {
@@ -45,6 +45,8 @@ public class AxisMover : MonoBehaviour
             xAxis.localPosition = Vector3.zero;
             yAxis.localPosition = Vector3.zero;
             zAxis.localPosition = Vector3.zero;
+            
+            ErrorManager.Instance?.ClearAllErrors();
         }
     }
 }
