@@ -18,6 +18,9 @@ public class ErrorVisualizer : MonoBehaviour
     [Header("카메라 동작 설정")] 
     public Vector3 cameraOffset = new Vector3(0.5f, 0.3f, 0.5f);
 
+    // private GameObject currentWarning;
+    // private Coroutine currentErrorCoroutine;
+    
     private void Start()
     {
         if (ErrorManager.Instance != null)
@@ -115,4 +118,36 @@ public class ErrorVisualizer : MonoBehaviour
         
         return bounds.center;
     }
+    
+    // public void ShowError(string location, string errorType, string message)
+    // {
+    //     if (currentErrorCoroutine != null)
+    //     {
+    //         StopCoroutine(currentErrorCoroutine);
+    //     }
+    //     
+    //     currentErrorCoroutine = StartCoroutine(ErrorSequence(location, errorType, message));
+    // }
+    //
+    // public void ClearError()
+    // {
+    //     if (currentErrorCoroutine != null)
+    //     {
+    //         StopCoroutine(currentErrorCoroutine);
+    //         currentErrorCoroutine = null;
+    //     }
+    //     
+    //     if (currentWarning != null)
+    //     {
+    //         Destroy(currentWarning);
+    //         currentWarning = null;
+    //     }
+    //     
+    //     if (errorCamera != null)
+    //     {
+    //         errorCamera.Priority.Value = 5;
+    //     }
+    //     
+    //     StopAllCoroutines();
+    // }
 }
