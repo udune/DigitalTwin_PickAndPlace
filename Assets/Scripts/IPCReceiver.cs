@@ -2,45 +2,151 @@ using UnityEngine;
 using System;
 using System.IO;
 using System.IO.Pipes;
+using System.Threading;
 using System.Threading.Tasks;
+
+public enum ConnectionStatus
+{
+    Disconnected,
+    Connecting,
+    Connected
+}
 
 public class IPCReceiver : MonoBehaviour
 {
+    public static IPCReceiver Instance { get; private set; }
+
     public PickAndPlaceController controller;
-    
+
+    [Header("Connection Settings")]
+    [Tooltip("재연결 시도 간격 (초)")]
+    public float reconnectInterval = 3f;
+
+    [Tooltip("최대 재연결 시도 횟수 (0 = 무제한)")]
+    public int maxReconnectAttempts = 0;
+
     private NamedPipeClientStream _pipeClient;
     private StreamReader _reader;
     private bool _isRunning = false;
-    
+    private CancellationTokenSource _cancellationTokenSource;
+    private int _reconnectAttempts = 0;
+
+    // 연결 상태
+    public ConnectionStatus Status { get; private set; } = ConnectionStatus.Disconnected;
+    public event Action<ConnectionStatus> ConnectionStatusChanged;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
+
     async void Start()
     {
-        await ConnectToPipe();
+        _cancellationTokenSource = new CancellationTokenSource();
+        await ConnectWithRetry();
+    }
 
-        // 연결 성공 시에만 데이터 수신 시작
-        if (_isRunning && _reader != null)
+    private async Task ConnectWithRetry()
+    {
+        while (!_cancellationTokenSource.Token.IsCancellationRequested)
         {
-            _ = ReceiveData();
+            if (await ConnectToPipe())
+            {
+                _reconnectAttempts = 0;
+                await ReceiveData();
+
+                // 연결이 끊어진 경우 재연결 시도
+                if (!_cancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    Debug.Log("[IPC] Connection lost. Attempting to reconnect...");
+                    SetConnectionStatus(ConnectionStatus.Disconnected);
+                }
+            }
+
+            // 최대 재연결 횟수 체크
+            _reconnectAttempts++;
+            if (maxReconnectAttempts > 0 && _reconnectAttempts >= maxReconnectAttempts)
+            {
+                Debug.LogError($"[IPC] Max reconnect attempts ({maxReconnectAttempts}) reached.");
+                break;
+            }
+
+            // 재연결 대기
+            if (!_cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                Debug.Log($"[IPC] Reconnecting in {reconnectInterval} seconds... (Attempt {_reconnectAttempts})");
+                await Task.Delay((int)(reconnectInterval * 1000), _cancellationTokenSource.Token).ContinueWith(t => { });
+            }
         }
     }
-    
-    private async Task ConnectToPipe()
+
+    private async Task<bool> ConnectToPipe()
     {
         try
         {
-            _pipeClient = new NamedPipeClientStream(".", "DigitalTwinPipe", 
+            CleanupConnection();
+
+            _pipeClient = new NamedPipeClientStream(".", "DigitalTwinPipe",
                 PipeDirection.InOut);
-            
+
+            SetConnectionStatus(ConnectionStatus.Connecting);
             Debug.Log("[IPC] Connecting to WPF...");
-            await _pipeClient.ConnectAsync();
+
+            // 타임아웃 설정 (5초)
+            using var timeoutCts = new CancellationTokenSource(5000);
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+                _cancellationTokenSource.Token, timeoutCts.Token);
+
+            await _pipeClient.ConnectAsync(linkedCts.Token);
+
             Debug.Log("[IPC] Connected to WPF!");
-            
             _reader = new StreamReader(_pipeClient);
             _isRunning = true;
+            SetConnectionStatus(ConnectionStatus.Connected);
+
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.LogWarning("[IPC] Connection attempt cancelled or timed out.");
+            SetConnectionStatus(ConnectionStatus.Disconnected);
+            return false;
         }
         catch (Exception ex)
         {
             Debug.LogError($"[IPC] Connection failed: {ex.Message}");
+            SetConnectionStatus(ConnectionStatus.Disconnected);
+            return false;
         }
+    }
+
+    private void SetConnectionStatus(ConnectionStatus status)
+    {
+        if (Status != status)
+        {
+            Status = status;
+            UnityMainThreadDispatcher.Enqueue(() => ConnectionStatusChanged?.Invoke(status));
+        }
+    }
+
+    private void CleanupConnection()
+    {
+        _isRunning = false;
+
+        try
+        {
+            _reader?.Dispose();
+            _pipeClient?.Dispose();
+        }
+        catch { }
+
+        _reader = null;
+        _pipeClient = null;
     }
     
     private async Task ReceiveData()
@@ -189,20 +295,23 @@ public class IPCReceiver : MonoBehaviour
     
     void OnDestroy()
     {
-        _isRunning = false;
+        _cancellationTokenSource?.Cancel();
+        CleanupConnection();
+        _cancellationTokenSource?.Dispose();
+    }
 
-        try
+    /// <summary>
+    /// 수동으로 재연결 시도
+    /// </summary>
+    public void Reconnect()
+    {
+        if (Status != ConnectionStatus.Connecting)
         {
-            _reader?.Dispose();
-            _pipeClient?.Dispose();
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource = new CancellationTokenSource();
+            _reconnectAttempts = 0;
+            _ = ConnectWithRetry();
         }
-        catch (Exception ex)
-        {
-            Debug.LogWarning($"[IPC] Cleanup error: {ex.Message}");
-        }
-
-        _reader = null;
-        _pipeClient = null;
     }
     
     // ===== 데이터 클래스 =====
