@@ -2,50 +2,79 @@ using UnityEngine;
 
 public class AxisMover : MonoBehaviour
 {
-    public Transform xAxis;
-    public Transform yAxis;
-    public Transform zAxis;
-    
-    public float speed = 2.0f;
-    
+    public PickAndPlaceController controller;
+
+    public float speed = 200f; // mm/s 단위
+
+    private float currentX;
+    private float currentY;
+    private float currentZ;
+
+    void Start()
+    {
+        // 초기 위치 (mm 단위)
+        currentX = 0f;
+        currentY = 0f;
+        currentZ = 0f;
+    }
+
     void Update()
     {
+        if (controller == null)
+        {
+            return;
+        }
+
+        bool moved = false;
+
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-            xAxis.localPosition += Vector3.left * speed * Time.deltaTime;
+            currentX -= speed * Time.deltaTime;
+            moved = true;
         }
 
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            xAxis.localPosition += Vector3.right * speed * Time.deltaTime;
+            currentX += speed * Time.deltaTime;
+            moved = true;
         }
 
         if (Input.GetKey(KeyCode.UpArrow))
         {
-            yAxis.localPosition += Vector3.forward * speed * Time.deltaTime;
+            currentY += speed * Time.deltaTime;
+            moved = true;
         }
 
         if (Input.GetKey(KeyCode.DownArrow))
         {
-            yAxis.localPosition += Vector3.back * speed * Time.deltaTime;
+            currentY -= speed * Time.deltaTime;
+            moved = true;
         }
 
         if (Input.GetKey(KeyCode.W))
         {
-            zAxis.localPosition += Vector3.up * speed * Time.deltaTime;
+            currentZ += speed * Time.deltaTime;
+            moved = true;
         }
 
         if (Input.GetKey(KeyCode.S))
         {
-            zAxis.localPosition += Vector3.down * speed * Time.deltaTime;
+            currentZ -= speed * Time.deltaTime;
+            moved = true;
         }
-        
+
+        if (moved)
+        {
+            controller.MoveToPosition(currentX, currentY, currentZ);
+        }
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            xAxis.localPosition = Vector3.zero;
-            yAxis.localPosition = Vector3.zero;
-            zAxis.localPosition = Vector3.zero;
-            
+            currentX = 0f;
+            currentY = 0f;
+            currentZ = 0f;
+            controller.MoveToPosition(0f, 0f, 0f);
+
             ErrorManager.Instance?.ClearAllErrors();
         }
     }

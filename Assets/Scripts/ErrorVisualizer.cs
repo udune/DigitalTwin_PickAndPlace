@@ -81,8 +81,6 @@ public class ErrorVisualizer : MonoBehaviour
                 return yAxis;
             case ErrorSource.ZAxis: 
                 return zAxis;
-            case ErrorSource.Gripper: 
-                return gripper;
             default: 
                 return null;
         }

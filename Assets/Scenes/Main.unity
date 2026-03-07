@@ -1216,8 +1216,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 29.999992, y: 0}
-  m_SizeDelta: {x: -340, y: 50}
+  m_AnchoredPosition: {x: 430, y: 0}
+  m_SizeDelta: {x: -1140, y: 50}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &494810437
 MonoBehaviour:
@@ -1270,9 +1270,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 494810436}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 15, y: -3}
+  m_AnchorMin: {x: 1, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
+  m_AnchoredPosition: {x: -155, y: -3}
   m_SizeDelta: {x: 12, y: 12}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &692973931
@@ -1345,9 +1345,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 494810436}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 140, y: -3}
+  m_AnchorMin: {x: 1, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
+  m_AnchoredPosition: {x: -180, y: -3}
   m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &708247599
@@ -2174,15 +2174,12 @@ MonoBehaviour:
   xAxis: {fileID: 1402731026214527552}
   yAxis: {fileID: 1402731026214527551}
   zAxis: {fileID: 1402731026214527550}
-  gripper: {fileID: 1402731026214527549}
   xMin: -1.5
   xMax: 1.5
   yMin: -1.5
   yMax: 1.5
   zMin: -1.5
   zMax: 1.5
-  monitorGripper: 1
-  gripperMinHeight: 0.1
   warningThreshold: 0.85
 --- !u!4 &1430930518
 Transform:
@@ -2378,7 +2375,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1601187883
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2418,7 +2415,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: c65a8b2316a940348ac0eb940474dcc6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: cd56b2451a17da14fa1d910dd8d2c531, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2918,6 +2915,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PickAndPlaceMachine
       objectReference: {fileID: 0}
+    - target: {fileID: 1449555301386206627, guid: 310f2b1a8cdc7ab4da5e0982e0891eda, type: 3}
+      propertyPath: controller
+      value: 
+      objectReference: {fileID: 1944982370}
     - target: {fileID: 4201772217773077145, guid: 310f2b1a8cdc7ab4da5e0982e0891eda, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

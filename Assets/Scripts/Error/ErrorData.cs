@@ -10,8 +10,7 @@ public enum ErrorSource
 {
     XAxis,
     YAxis,
-    ZAxis,
-    Gripper
+    ZAxis
 }
 
 [Serializable]

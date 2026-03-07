@@ -60,7 +60,7 @@ public class IPCReceiver : MonoBehaviour
                 _reconnectAttempts = 0;
                 await ReceiveData();
 
-                // 연결이 끊어진 경우 재연결 시도
+                // 연결이 끊어진 경우 재연결 도
                 if (!_cancellationTokenSource.Token.IsCancellationRequested)
                 {
                     Debug.Log("[IPC] Connection lost. Attempting to reconnect...");
@@ -278,7 +278,6 @@ public class IPCReceiver : MonoBehaviour
             "XAxis" => ErrorSource.XAxis,
             "YAxis" => ErrorSource.YAxis,
             "ZAxis" => ErrorSource.ZAxis,
-            "Gripper" => ErrorSource.Gripper,
             _ => ErrorSource.XAxis
         };
     }
