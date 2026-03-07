@@ -4,7 +4,7 @@ public class AxisMover : MonoBehaviour
 {
     public PickAndPlaceController controller;
 
-    public float speed = 200f; // mm/s 단위
+    public float speed = 100f; // mm/s 단위
 
     private float currentX;
     private float currentY;
@@ -16,6 +16,28 @@ public class AxisMover : MonoBehaviour
         currentX = 0f;
         currentY = 0f;
         currentZ = 0f;
+
+        // WPF에서 데이터 수신 시 동기화
+        if (IPCReceiver.Instance != null)
+        {
+            IPCReceiver.Instance.OnAxisDataReceived += OnWpfAxisDataReceived;
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (IPCReceiver.Instance != null)
+        {
+            IPCReceiver.Instance.OnAxisDataReceived -= OnWpfAxisDataReceived;
+        }
+    }
+
+    private void OnWpfAxisDataReceived(float x, float y, float z)
+    {
+        // WPF에서 받은 값으로 현재 위치 동기화
+        currentX = x;
+        currentY = y;
+        currentZ = z;
     }
 
     void Update()
@@ -66,6 +88,9 @@ public class AxisMover : MonoBehaviour
         if (moved)
         {
             controller.MoveToPosition(currentX, currentY, currentZ);
+
+            // WPF로 전송
+            IPCReceiver.Instance?.SendAxisData(currentX, currentY, currentZ);
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -74,6 +99,9 @@ public class AxisMover : MonoBehaviour
             currentY = 0f;
             currentZ = 0f;
             controller.MoveToPosition(0f, 0f, 0f);
+
+            // WPF로 전송
+            IPCReceiver.Instance?.SendAxisData(0f, 0f, 0f);
 
             ErrorManager.Instance?.ClearAllErrors();
         }

@@ -27,9 +27,18 @@ public class IPCReceiver : MonoBehaviour
 
     private NamedPipeClientStream _pipeClient;
     private StreamReader _reader;
+    private StreamWriter _writer;
     private bool _isRunning = false;
     private CancellationTokenSource _cancellationTokenSource;
     private int _reconnectAttempts = 0;
+
+    // 현재 축 위치 (mm 단위) - AxisMover와 동기화용
+    public float CurrentX { get; private set; }
+    public float CurrentY { get; private set; }
+    public float CurrentZ { get; private set; }
+
+    // 축 데이터 수신 이벤트
+    public event Action<float, float, float> OnAxisDataReceived;
 
     // 연결 상태
     public ConnectionStatus Status { get; private set; } = ConnectionStatus.Disconnected;
@@ -106,6 +115,7 @@ public class IPCReceiver : MonoBehaviour
 
             Debug.Log("[IPC] Connected to WPF!");
             _reader = new StreamReader(_pipeClient);
+            _writer = new StreamWriter(_pipeClient) { AutoFlush = true };
             _isRunning = true;
             SetConnectionStatus(ConnectionStatus.Connected);
 
@@ -141,11 +151,13 @@ public class IPCReceiver : MonoBehaviour
         try
         {
             _reader?.Dispose();
+            _writer?.Dispose();
             _pipeClient?.Dispose();
         }
         catch { }
 
         _reader = null;
+        _writer = null;
         _pipeClient = null;
     }
     
@@ -218,19 +230,64 @@ public class IPCReceiver : MonoBehaviour
         try
         {
             var wrapper = JsonUtility.FromJson<AxisDataWrapper>(json);
-            
-            if (controller != null && wrapper.data != null)
+
+            if (wrapper.data != null)
             {
-                controller.MoveToPosition(
-                    wrapper.data.x,
-                    wrapper.data.y,
-                    wrapper.data.z
-                );
+                // 현재 위치 저장
+                CurrentX = wrapper.data.x;
+                CurrentY = wrapper.data.y;
+                CurrentZ = wrapper.data.z;
+
+                // 컨트롤러에 전달
+                if (controller != null)
+                {
+                    controller.MoveToPosition(CurrentX, CurrentY, CurrentZ);
+                }
+
+                // 이벤트 발생 (AxisMover 동기화용)
+                OnAxisDataReceived?.Invoke(CurrentX, CurrentY, CurrentZ);
             }
         }
         catch (Exception ex)
         {
             Debug.LogError($"[IPC] ParseAxisData error: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Unity에서 WPF로 축 데이터 전송
+    /// </summary>
+    public void SendAxisData(float x, float y, float z)
+    {
+        if (Status != ConnectionStatus.Connected || _writer == null)
+        {
+            return;
+        }
+
+        try
+        {
+            CurrentX = x;
+            CurrentY = y;
+            CurrentZ = z;
+
+            var data = new AxisDataWrapper
+            {
+                type = "axis_data",
+                data = new AxisData
+                {
+                    x = x,
+                    y = y,
+                    z = z,
+                    timestamp = DateTime.Now.ToString("o")
+                }
+            };
+
+            string json = JsonUtility.ToJson(data);
+            _writer.WriteLine(json);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[IPC] SendAxisData error: {ex.Message}");
         }
     }
     
@@ -314,22 +371,22 @@ public class IPCReceiver : MonoBehaviour
     }
     
     // ===== 데이터 클래스 =====
-    
+
     [Serializable]
     private class IPCMessage
     {
         public string type;
     }
-    
+
     [Serializable]
-    private class AxisDataWrapper
+    public class AxisDataWrapper
     {
         public string type;
         public AxisData data;
     }
-    
+
     [Serializable]
-    private class AxisData
+    public class AxisData
     {
         public float x;
         public float y;

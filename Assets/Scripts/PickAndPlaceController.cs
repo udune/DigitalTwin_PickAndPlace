@@ -38,8 +38,9 @@ public class PickAndPlaceController : MonoBehaviour
     public void MoveToPosition(float x, float y, float z)
     {
         // mm를 Unity 단위로 변환 (1 Blender unit = 100mm)
+        // yAxis는 Z 방향(forward/back), zAxis는 Y 방향(up/down)으로 이동
         targetXPos = new Vector3(x / 100f, 0, 0);
-        targetYPos = new Vector3(0, y / 100f, 0);
-        targetZPos = new Vector3(0, 0, z / 100f);
+        targetYPos = new Vector3(0, 0, y / 100f);
+        targetZPos = new Vector3(0, z / 100f, 0);
     }
 }
