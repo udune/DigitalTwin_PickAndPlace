@@ -55,10 +55,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06c0efc5e3bd286489aee9405dfa9cd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AxisMover
-  xAxis: {fileID: 3199156904484950776}
-  yAxis: {fileID: 4365077881286230699}
-  zAxis: {fileID: 8230071857956792483}
-  speed: 0.5
+  controller: {fileID: 0}
+  speed: 100
 --- !u!1 &439870318478303813
 GameObject:
   m_ObjectHideFlags: 0
