@@ -5,15 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="00311a8e-6fc5-4ec7-b7dd-9d005f3d5731" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Error/ErrorConditionMonitor.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Error/ErrorManager.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/UI/ErrorUI.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/UI/ErrorUIManager.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIAnimationHelper.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/result.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DigitalTwin_PickAndPlace/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DigitalTwin_PickAndPlace/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/AxisMover.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/AxisMover.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/ErrorVisualizer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/ErrorVisualizer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Main.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Main.unity" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,13 +15,14 @@
   </component>
   <component name="EmbeddingIndexingInfo">
     <option name="cachedIndexableFilesCount" value="3" />
-    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Error/ErrorData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/PickAndPlaceController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UnityMainThreadDispatcher.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
@@ -107,7 +101,10 @@
       <workItem from="1770182111781" duration="10276000" />
       <workItem from="1770271476714" duration="5173000" />
       <workItem from="1770367248310" duration="1834000" />
-      <workItem from="1770377608709" duration="4096000" />
+      <workItem from="1770377608709" duration="12066000" />
+      <workItem from="1770473734546" duration="4789000" />
+      <workItem from="1772115119451" duration="4810000" />
+      <workItem from="1772808837880" duration="762000" />
     </task>
     <servers />
   </component>
