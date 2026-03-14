@@ -452,6 +452,7 @@ MonoBehaviour:
   controller: {fileID: 1944982370}
   reconnectInterval: 3
   maxReconnectAttempts: 0
+  connectionCheckInterval: 0.5
 --- !u!4 &173195015
 Transform:
   m_ObjectHideFlags: 0
