@@ -297,6 +297,13 @@ public class IPCReceiver : MonoBehaviour
         {
             var errorMsg = JsonUtility.FromJson<ErrorMessage>(json);
 
+            // source 유효성 검사: 빈 source는 에러 추적 및 해제가 불가능하므로 무시
+            if (string.IsNullOrEmpty(errorMsg.source))
+            {
+                Debug.LogWarning($"[IPC] Received error with empty source. Ignoring. Message: {errorMsg.message}");
+                return;
+            }
+
             if (ErrorManager.Instance != null)
             {
                 // 문자열을 Enum으로 변환

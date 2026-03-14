@@ -18,7 +18,6 @@ public class ErrorConditionMonitor : MonoBehaviour
     [Header("Settings")]
     [Range(0f, 1f)]
     public float warningThreshold = 0.85f;
-    private const float Hysteresis = 0.02f;
 
     private void Update()
     {
@@ -27,72 +26,57 @@ public class ErrorConditionMonitor : MonoBehaviour
             return;
         }
 
-        CheckAxis(xAxis, xAxis.localPosition.x, xMin, xMax, ErrorSource.XAxis, "XAxis", "X-AXIS");
-        CheckAxis(yAxis, yAxis.localPosition.z, yMin, yMax, ErrorSource.YAxis, "YAxis", "Y-AXIS");
-        CheckAxis(zAxis, zAxis.localPosition.y, zMin, zMax, ErrorSource.ZAxis, "ZAxis", "Z-AXIS");
+        CheckAxis(xAxis.localPosition.x, xMin, xMax, ErrorSource.XAxis, "XAxis");
+        CheckAxis(yAxis.localPosition.z, yMin, yMax, ErrorSource.YAxis, "YAxis");
+        CheckAxis(zAxis.localPosition.y, zMin, zMax, ErrorSource.ZAxis, "ZAxis");
     }
 
-    private void CheckAxis(Transform axis, float currentValue, float min, float max, ErrorSource source, string idPrefix, string locationName)
+    private void CheckAxis(float value, float min, float max, ErrorSource source, string id)
     {
-        if (axis == null)
-        {
-            return;
-        }
-
         float range = max - min;
-        float warningMargin = range * (1.0f - warningThreshold) * 0.5f;
+        float warningMargin = range * (1f - warningThreshold) * 0.5f;
 
-        bool isErrorMin = currentValue < min;
-        bool isErrorMax = currentValue > max;
-        bool isWarningMin = currentValue < (min + warningMargin) && !isErrorMin;
-        bool isWarningMax = currentValue > (max - warningMargin) && !isErrorMax;
+        string errorId = $"{id}_Limit";
+        string warningId = $"{id}_Warning";
 
-        string errorId = $"{idPrefix}_Limit";
-        string warningId = $"{idPrefix}_Warning";
+        // 상태 판별: Error > Warning > Normal
+        bool isError = value < min || value > max;
+        bool isWarning = !isError && (value < min + warningMargin || value > max - warningMargin);
+        bool isNormal = !isError && !isWarning;
 
-        if (isErrorMin || isErrorMax)
+        // Error 상태
+        if (isError)
         {
             ErrorManager.Instance.RaiseError(new ErrorInfo
             {
                 Id = errorId,
                 Type = ErrorType.Error,
                 Source = source,
-                Location = locationName,
-                Message = $"Limit Exceeded: {currentValue:F2}",
+                Location = id,
+                Message = $"Limit Exceeded: {value:F2}",
                 Timestamp = Time.time
             });
-
             ErrorManager.Instance.ClearError(warningId);
         }
-        else
-        {
-            if (currentValue > min + Hysteresis && currentValue < max - Hysteresis)
-            {
-                ErrorManager.Instance.ClearError(errorId);
-            }
-        }
-
-        if ((isWarningMin || isWarningMax) && !ErrorManager.Instance.ErrorInfoList.Exists(errorInfo => errorInfo.Id == errorId))
+        // Warning 상태
+        else if (isWarning)
         {
             ErrorManager.Instance.RaiseError(new ErrorInfo
             {
                 Id = warningId,
                 Type = ErrorType.Warning,
                 Source = source,
-                Location = locationName,
-                Message = $"Approaching Limit: {currentValue:F2}",
+                Location = id,
+                Message = $"Approaching Limit: {value:F2}",
                 Timestamp = Time.time
             });
+            ErrorManager.Instance.ClearError(errorId);
         }
-        else
+        // Normal 상태
+        else if (isNormal)
         {
-            bool clearMin = currentValue > (min + warningMargin + Hysteresis);
-            bool clearMax = currentValue < (max - warningMargin - Hysteresis);
-
-            if (clearMin && clearMax)
-            {
-                ErrorManager.Instance.ClearError(warningId);
-            }
+            ErrorManager.Instance.ClearError(errorId);
+            ErrorManager.Instance.ClearError(warningId);
         }
     }
 }

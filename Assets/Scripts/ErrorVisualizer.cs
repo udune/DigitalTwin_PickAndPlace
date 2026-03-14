@@ -1,111 +1,86 @@
-using System.Collections;
 using System.Linq;
 using Unity.Cinemachine;
 using UnityEngine;
 
 public class ErrorVisualizer : MonoBehaviour
 {
-    [Header("카메라 설정")] 
+    [Header("카메라 설정")]
     public CinemachineCamera mainCamera;
     public CinemachineCamera errorCamera;
 
-    [Header("오류 대상")] 
+    [Header("오류 대상")]
     public Transform xAxis;
     public Transform yAxis;
     public Transform zAxis;
-    public Transform gripper;
 
-    [Header("카메라 동작 설정")] 
+    [Header("카메라 동작 설정")]
     public Vector3 cameraOffset = new Vector3(0.5f, 0.3f, 0.5f);
 
-    // private GameObject currentWarning;
-    // private Coroutine currentErrorCoroutine;
-    
-    private void Start()
-    {
-        if (ErrorManager.Instance != null)
-        {
-            ErrorManager.Instance.ErrorRaisedAction += HandleErrorRaisedAction;
-            ErrorManager.Instance.AllClearedAction += HandleAllClearedAction;
-        }
-    }
+    private ErrorSource? currentTarget = null;
 
-    private void OnDestroy()
+    private void Update()
     {
-        if (ErrorManager.Instance != null)
-        {
-            ErrorManager.Instance.ErrorRaisedAction -= HandleErrorRaisedAction;
-            ErrorManager.Instance.AllClearedAction -= HandleAllClearedAction;
-        }
-    }
-
-    private void HandleErrorRaisedAction(ErrorInfo _errorInfo)
-    {
-        bool hasError = ErrorManager.Instance.ErrorInfoList.Any(errorInfo => errorInfo.Type == ErrorType.Error);
-        
-        if (hasError && _errorInfo.Type == ErrorType.Warning)
+        if (ErrorManager.Instance == null)
         {
             return;
         }
 
-        FocusCamera(_errorInfo.Source);
-    }
+        var errors = ErrorManager.Instance.ErrorInfoList;
 
-    private void HandleAllClearedAction()
-    {
-        errorCamera.Priority = 5;
+        if (errors.Count == 0)
+        {
+            // 에러 없음 → 카메라 복귀
+            if (currentTarget != null)
+            {
+                errorCamera.Priority = 5;
+                currentTarget = null;
+            }
+            return;
+        }
+
+        // 에러 있음 → 우선순위: Error > Warning
+        var topError = errors.FirstOrDefault(e => e.Type == ErrorType.Error);
+        if (topError.Id == null)
+        {
+            topError = errors[0];
+        }
+
+        // 타겟이 바뀌었을 때만 카메라 이동
+        if (currentTarget != topError.Source)
+        {
+            currentTarget = topError.Source;
+            FocusCamera(topError.Source);
+        }
     }
 
     private void FocusCamera(ErrorSource source)
     {
-        Transform target = GetTransformForSource(source);
+        Transform target = source switch
+        {
+            ErrorSource.XAxis => xAxis,
+            ErrorSource.YAxis => yAxis,
+            ErrorSource.ZAxis => zAxis,
+            _ => null
+        };
+
         if (target == null)
         {
             return;
         }
 
-        Vector3 targetWorldPos = GetTargetCenter(target);
-        
-        errorCamera.transform.position = targetWorldPos + cameraOffset;
-        errorCamera.transform.LookAt(targetWorldPos);
+        Vector3 targetPos = GetTargetCenter(target);
+        errorCamera.transform.position = targetPos + cameraOffset;
+        errorCamera.transform.LookAt(targetPos);
         errorCamera.Priority = 20;
-    }
-
-    private Transform GetTransformForSource(ErrorSource source)
-    {
-        switch (source)
-        {
-            case ErrorSource.XAxis: 
-                return xAxis;
-            case ErrorSource.YAxis: 
-                return yAxis;
-            case ErrorSource.ZAxis: 
-                return zAxis;
-            default: 
-                return null;
-        }
     }
 
     private Vector3 GetTargetCenter(Transform target)
     {
-        if (target.childCount == 0)
-        {
-            return target.position;
-        }
-        
         Renderer[] renderers = target.GetComponentsInChildren<Renderer>();
+
         if (renderers.Length == 0)
         {
-            Vector3 sum = Vector3.zero;
-            int count = 0;
-            
-            foreach (Transform child in target)
-            {
-                sum += child.position;
-                count++;
-            }
-            
-            return count > 0 ? sum / count : target.position;
+            return target.position;
         }
 
         Bounds bounds = renderers[0].bounds;
@@ -113,39 +88,7 @@ public class ErrorVisualizer : MonoBehaviour
         {
             bounds.Encapsulate(renderers[i].bounds);
         }
-        
+
         return bounds.center;
     }
-    
-    // public void ShowError(string location, string errorType, string message)
-    // {
-    //     if (currentErrorCoroutine != null)
-    //     {
-    //         StopCoroutine(currentErrorCoroutine);
-    //     }
-    //     
-    //     currentErrorCoroutine = StartCoroutine(ErrorSequence(location, errorType, message));
-    // }
-    //
-    // public void ClearError()
-    // {
-    //     if (currentErrorCoroutine != null)
-    //     {
-    //         StopCoroutine(currentErrorCoroutine);
-    //         currentErrorCoroutine = null;
-    //     }
-    //     
-    //     if (currentWarning != null)
-    //     {
-    //         Destroy(currentWarning);
-    //         currentWarning = null;
-    //     }
-    //     
-    //     if (errorCamera != null)
-    //     {
-    //         errorCamera.Priority.Value = 5;
-    //     }
-    //     
-    //     StopAllCoroutines();
-    // }
 }
