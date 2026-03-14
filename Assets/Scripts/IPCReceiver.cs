@@ -4,6 +4,8 @@ using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 
 public enum ConnectionStatus
 {
@@ -14,6 +16,16 @@ public enum ConnectionStatus
 
 public class IPCReceiver : MonoBehaviour
 {
+    // Windows API for pipe connection check
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool PeekNamedPipe(
+        SafePipeHandle hNamedPipe,
+        byte[] lpBuffer,
+        uint nBufferSize,
+        IntPtr lpBytesRead,
+        out uint lpTotalBytesAvail,
+        IntPtr lpBytesLeftThisMessage);
+
     public static IPCReceiver Instance { get; private set; }
 
     public PickAndPlaceController controller;
@@ -24,6 +36,9 @@ public class IPCReceiver : MonoBehaviour
 
     [Tooltip("최대 재연결 시도 횟수 (0 = 무제한)")]
     public int maxReconnectAttempts = 0;
+
+    [Tooltip("연결 상태 확인 간격 (초)")]
+    public float connectionCheckInterval = 0.5f;
 
     private NamedPipeClientStream _pipeClient;
     private StreamReader _reader;
@@ -119,6 +134,9 @@ public class IPCReceiver : MonoBehaviour
             _isRunning = true;
             SetConnectionStatus(ConnectionStatus.Connected);
 
+            // 연결 상태 모니터링 시작
+            _ = MonitorConnection();
+
             return true;
         }
         catch (OperationCanceledException)
@@ -189,6 +207,69 @@ public class IPCReceiver : MonoBehaviour
         }
 
         _isRunning = false;
+    }
+
+    /// <summary>
+    /// 연결 상태를 주기적으로 모니터링하여 끊김을 감지합니다.
+    /// </summary>
+    private async Task MonitorConnection()
+    {
+        int checkIntervalMs = (int)(connectionCheckInterval * 1000);
+
+        while (_isRunning && _pipeClient != null)
+        {
+            await Task.Delay(checkIntervalMs);
+
+            if (!_isRunning || _pipeClient == null)
+                break;
+
+            try
+            {
+                // 파이프가 연결되어 있는지 확인
+                // IsConnected는 마지막 I/O 결과 기반이므로, 0바이트 쓰기로 실제 상태 확인
+                if (!_pipeClient.IsConnected || !IsConnectionAlive())
+                {
+                    Debug.LogWarning("[IPC] Connection lost detected by monitor.");
+                    _isRunning = false;
+                    break;
+                }
+            }
+            catch (Exception)
+            {
+                Debug.LogWarning("[IPC] Connection check failed - pipe disconnected.");
+                _isRunning = false;
+                break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 파이프 연결이 실제로 살아있는지 확인합니다.
+    /// PeekNamedPipe API를 사용하여 I/O 없이도 연결 상태를 정확히 감지합니다.
+    /// </summary>
+    private bool IsConnectionAlive()
+    {
+        if (_pipeClient == null || !_pipeClient.IsConnected)
+            return false;
+
+        try
+        {
+            // PeekNamedPipe는 파이프가 끊어졌으면 false를 반환합니다.
+            // 이 방법은 실제 데이터를 읽지 않고도 연결 상태를 확인할 수 있습니다.
+            bool result = PeekNamedPipe(
+                _pipeClient.SafePipeHandle,
+                null,
+                0,
+                IntPtr.Zero,
+                out _,
+                IntPtr.Zero);
+
+            return result;
+        }
+        catch
+        {
+            return false;
+        }
     }
     
     private void ProcessMessage(string json)
