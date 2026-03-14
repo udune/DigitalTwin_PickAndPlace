@@ -1986,7 +1986,6 @@ MonoBehaviour:
   xAxis: {fileID: 1402731026214527552}
   yAxis: {fileID: 1402731026214527551}
   zAxis: {fileID: 1402731026214527550}
-  gripper: {fileID: 1402731026214527549}
   cameraOffset: {x: 0.5, y: 0.3, z: 0.5}
 --- !u!1 &1072652259
 GameObject:
@@ -2967,11 +2966,6 @@ PrefabInstance:
 --- !u!4 &1402731026214527548 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4201772217773077145, guid: 310f2b1a8cdc7ab4da5e0982e0891eda, type: 3}
-  m_PrefabInstance: {fileID: 1402731026214527547}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1402731026214527549 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2080706401586455933, guid: 310f2b1a8cdc7ab4da5e0982e0891eda, type: 3}
   m_PrefabInstance: {fileID: 1402731026214527547}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &1402731026214527550 stripped
