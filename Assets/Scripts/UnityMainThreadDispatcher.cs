@@ -4,29 +4,14 @@ using UnityEngine;
 
 public class UnityMainThreadDispatcher : MonoBehaviour
 {
-    private static Queue<Action> executionQueue = new Queue<Action>();
-    private static UnityMainThreadDispatcher instance = null;
-    
-    public static UnityMainThreadDispatcher Instance()
-    {
-        if (!Exists())
-        {
-            throw new Exception("UnityMainThreadDispatcher not initialized");
-        }
-        
-        return instance;
-    }
-    
-    public static bool Exists()
-    {
-        return instance != null;
-    }
-    
+    private static readonly Queue<Action> executionQueue = new Queue<Action>();
+    private static bool initialized = false;
+
     void Awake()
     {
-        if (instance == null)
+        if (!initialized)
         {
-            instance = this;
+            initialized = true;
             DontDestroyOnLoad(gameObject);
         }
     }

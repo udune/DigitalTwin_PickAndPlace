@@ -5,8 +5,12 @@ using UnityEngine.Rendering;
 
 public class BillBoard : MonoBehaviour
 {
+    private Transform _mainCameraTransform;
+
     private void Start()
     {
+        _mainCameraTransform = Camera.main.transform;
+
         TextMeshProUGUI text = GetComponent<TextMeshProUGUI>();
         if (text != null)
         {
@@ -16,6 +20,6 @@ public class BillBoard : MonoBehaviour
 
     private void LateUpdate()
     {
-        transform.LookAt(transform.position + Camera.main.transform.forward);
+        transform.LookAt(transform.position + _mainCameraTransform.forward);
     }
 }

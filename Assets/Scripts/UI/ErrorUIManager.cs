@@ -63,7 +63,7 @@ public class ErrorUIManager : MonoBehaviour
             StartCoroutine(UIAnimationHelper.FadeIn(panelCanvasGroup, 0.3f));
         }
 
-        if (errorUIDict.ContainsKey(errorInfo.Id) == false)
+        if (!errorUIDict.ContainsKey(errorInfo.Id))
         {
             GameObject obj = Instantiate(errorPrefab, errorContainer);
             ErrorUI errorUI = obj.GetComponent<ErrorUI>();

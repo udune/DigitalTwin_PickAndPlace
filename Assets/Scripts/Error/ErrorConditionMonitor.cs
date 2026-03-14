@@ -42,7 +42,6 @@ public class ErrorConditionMonitor : MonoBehaviour
         // 상태 판별: Error > Warning > Normal
         bool isError = value < min || value > max;
         bool isWarning = !isError && (value < min + warningMargin || value > max - warningMargin);
-        bool isNormal = !isError && !isWarning;
 
         // Error 상태
         if (isError)
@@ -73,7 +72,7 @@ public class ErrorConditionMonitor : MonoBehaviour
             ErrorManager.Instance.ClearError(errorId);
         }
         // Normal 상태
-        else if (isNormal)
+        else
         {
             ErrorManager.Instance.ClearError(errorId);
             ErrorManager.Instance.ClearError(warningId);
