@@ -32,61 +32,18 @@
 - 물리적 리미트 클램핑
 - 실제 PLC 없이도 완전한 테스트 가능
  
-### 4. **이중 클라이언트 아키텍처**
-```
-WPF Dashboard (마스터)          Unity Visualizer (슬레이브)
-    ↓                                   ↓
-제어 및 모니터링            ←→    3D 시각화 및 오류 표시
-    ↓                                   ↓
-  Named Pipe IPC (DigitalTwinPipe)
-```
- 
-### 5. **실시간 데이터 시각화**
+### 4. **실시간 데이터 시각화**
 - LiveCharts 기반 3축 위치 차트 (최근 100개 데이터)
 - 알람 그룹화 (같은 오류 자동 묶음, "×N" 표시)
 - 시간 범위 표시 (HH:mm:ss ~ HH:mm:ss)
 - CSV 내보내기 (알람 이력)
  
-### 6. **사이클 자동 카운팅**
+### 5. **사이클 자동 카운팅**
 - Z축 바닥 도달 감지
 - 평균 사이클 타임 계산
 - 금일 사이클 횟수 표시
  
 ---
-
-## 프로젝트 구조
- 
-### 전체 구조
-├── Unity_DigitalTwin/
-│   ├── Assets/
-│   │   ├── Scenes/
-│   │   │   └── MainScene.unity
-│   │   ├── Scripts/
-│   │   │   ├── Core/
-│   │   │   │   ├── PickAndPlaceController.cs
-│   │   │   │   ├── ErrorManager.cs
-│   │   │   │   └── ErrorVisualizer.cs
-│   │   │   ├── Communication/
-│   │   │   │   ├── IPCReceiver.cs
-│   │   │   │   └── UnityMainThreadDispatcher.cs
-│   │   │   └── Input/
-│   │   │       └── AxisMover.cs
-│   │   ├── Models/
-│   │   │   └── PickAndPlaceMachine.fbx
-│   │   └── Materials/
-│   │       ├── Aluminum.mat
-│   │       └── Black_Plastic.mat
-│   └── ProjectSettings/
-│
-├── Blender/                      # 3D 모델 소스
-│   ├── PickAndPlace.blend
-│   └── generate_model.py
-│
-├── Docs/                         # 문서
-│   ├── PROJECT_DOCUMENTATION.md
-│   └── IMPLEMENTATION_GUIDE.md
-│
-└── README.md
 
 ## 개발 진행 중
  
