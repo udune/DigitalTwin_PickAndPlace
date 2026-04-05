@@ -13,10 +13,10 @@
 ## 핵심 기능
  
 ### 1. **스마트 오류 시각화**
-- ✅ 오류 발생 시 Cinemachine 카메라 자동 포커싱
-- ✅ Priority 기반 카메라 전환 (1.5초 블렌딩)
-- ✅ Error 우선순위 > Warning (중요도 기반 표시)
-- ✅ 오류 해제 시 자동 복귀
+- 오류 발생 시 Cinemachine 카메라 자동 포커싱
+- Priority 기반 카메라 전환 (1.5초 블렌딩)
+- Error 우선순위 > Warning (중요도 기반 표시)
+- 오류 해제 시 자동 복귀
 
 ### 2. **실시간 오류 감지**
 | 오류 종류 | 조건 | 레벨 |
@@ -44,6 +44,9 @@
 - 금일 사이클 횟수 표시
  
 ---
+
+<img width="344" height="496" alt="image" src="https://github.com/user-attachments/assets/00b99d15-1101-48bb-a663-f9804202bece" />
+
 
 ## 개발 진행 중
  
