@@ -1,1 +1,102 @@
 # DigitalTwin_PickAndPlace
+
+**Digital Twin - Pick and Place System**은 산업용 픽앤플레이스 로봇의 디지털 트윈 구현체입니다. WPF 기반 제어 대시보드와 Unity 3D 시각화 엔진을 Named Pipe IPC로 연결하여 실시간 모니터링, 오류 감지, 원격 제어 기능을 제공합니다.
+
+### 핵심 가치
+ 
+- **실시간 모니터링**: 3축(X, Y, Z) 위치 및 속도를 100Hz로 모니터링
+- **스마트 오류 시각화**: 오류 발생 시 Unity 카메라가 자동으로 해당 부위 줌인
+- **이중 제어**: WPF 대시보드와 Unity 키보드 입력 모두 지원
+- **데이터 분석**: 실시간 차트, 알람 그룹화, CSV 내보내기
+- **양방향 동기화**: WPF ↔ Unity 실시간 데이터 동기화
+
+## 핵심 기능
+ 
+### 1. **스마트 오류 시각화**
+- ✅ 오류 발생 시 Cinemachine 카메라 자동 포커싱
+- ✅ Priority 기반 카메라 전환 (1.5초 블렌딩)
+- ✅ Error 우선순위 > Warning (중요도 기반 표시)
+- ✅ 오류 해제 시 자동 복귀
+
+### 2. **실시간 오류 감지**
+| 오류 종류 | 조건 | 레벨 |
+|-----------|------|------|
+| X/Y축 리미트 오버 | \|X\| > 125.9mm, \|Y\| > 125.9mm | Error |
+| Z축 범위 초과 | Z < -60mm 또는 Z > 0mm | Error |
+| 안전 높이 미달 | Z < -30mm && (VX ≠ 0 \|\| VY ≠ 0) | Warning |
+| 과속 감지 | \|V\| > 150mm/s | Warning |
+ 
+### 3. **가상 PLC 시뮬레이터**
+- 100Hz 업데이트 루프
+- 부드러운 가감속 프로파일 (Lerp)
+- 물리적 리미트 클램핑
+- 실제 PLC 없이도 완전한 테스트 가능
+ 
+### 4. **이중 클라이언트 아키텍처**
+```
+WPF Dashboard (마스터)          Unity Visualizer (슬레이브)
+    ↓                                   ↓
+제어 및 모니터링            ←→    3D 시각화 및 오류 표시
+    ↓                                   ↓
+  Named Pipe IPC (DigitalTwinPipe)
+```
+ 
+### 5. **실시간 데이터 시각화**
+- LiveCharts 기반 3축 위치 차트 (최근 100개 데이터)
+- 알람 그룹화 (같은 오류 자동 묶음, "×N" 표시)
+- 시간 범위 표시 (HH:mm:ss ~ HH:mm:ss)
+- CSV 내보내기 (알람 이력)
+ 
+### 6. **사이클 자동 카운팅**
+- Z축 바닥 도달 감지
+- 평균 사이클 타임 계산
+- 금일 사이클 횟수 표시
+ 
+---
+
+## 프로젝트 구조
+ 
+### 전체 구조
+├── Unity_DigitalTwin/
+│   ├── Assets/
+│   │   ├── Scenes/
+│   │   │   └── MainScene.unity
+│   │   ├── Scripts/
+│   │   │   ├── Core/
+│   │   │   │   ├── PickAndPlaceController.cs
+│   │   │   │   ├── ErrorManager.cs
+│   │   │   │   └── ErrorVisualizer.cs
+│   │   │   ├── Communication/
+│   │   │   │   ├── IPCReceiver.cs
+│   │   │   │   └── UnityMainThreadDispatcher.cs
+│   │   │   └── Input/
+│   │   │       └── AxisMover.cs
+│   │   ├── Models/
+│   │   │   └── PickAndPlaceMachine.fbx
+│   │   └── Materials/
+│   │       ├── Aluminum.mat
+│   │       └── Black_Plastic.mat
+│   └── ProjectSettings/
+│
+├── Blender/                      # 3D 모델 소스
+│   ├── PickAndPlace.blend
+│   └── generate_model.py
+│
+├── Docs/                         # 문서
+│   ├── PROJECT_DOCUMENTATION.md
+│   └── IMPLEMENTATION_GUIDE.md
+│
+└── README.md
+
+## 개발 진행 중
+ 
+### 단기 (1개월)
+- [ ] **Pick & Place 기능** - 공압 그리퍼로 물체 집기/놓기
+- [ ] **OpenCV 비전 인식** - 사각형 물체만 자동 감지
+- [ ] **성능 최적화** - 메모리 사용량 감소
+ 
+### 중기 (3개월)
+- [ ] **실제 PLC 연동** - 미쓰비시
+- [ ] **OPC UA 통신** - 산업 표준 프로토콜
+- [ ] **데이터베이스 연동** - PostgreSQL
+- [ ] **Web GL 배포**
