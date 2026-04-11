@@ -29,6 +29,7 @@ public class IPCReceiver : MonoBehaviour
     public static IPCReceiver Instance { get; private set; }
 
     public PickAndPlaceController controller;
+    public GripperController gripper;
 
     [Header("Connection Settings")]
     [Tooltip("재연결 시도 간격 (초)")]
@@ -294,7 +295,11 @@ public class IPCReceiver : MonoBehaviour
                         ErrorManager.Instance.ClearAllErrors();
                     }
                     break;
-                    
+
+                case "gripper_command":
+                    ParseGripperCommand(json);
+                    break;
+
                 default:
                     Debug.LogWarning($"[IPC] Unknown message type: {message.type}");
                     break;
@@ -436,7 +441,84 @@ public class IPCReceiver : MonoBehaviour
             _ => ErrorType.Error
         };
     }
-    
+
+    /// <summary>
+    /// WPF로부터 그리퍼 명령 수신 및 처리
+    /// </summary>
+    private void ParseGripperCommand(string json)
+    {
+        try
+        {
+            var gripperMsg = JsonUtility.FromJson<GripperCommandMessage>(json);
+
+            if (gripper == null)
+            {
+                Debug.LogError("[IPC] GripperController not assigned!");
+                return;
+            }
+
+            bool success = false;
+
+            switch (gripperMsg.command)
+            {
+                case "pick":
+                    success = gripper.Pick();
+                    Debug.Log($"[IPC] Pick command received - Success: {success}");
+                    break;
+
+                case "place":
+                    success = gripper.Place();
+                    Debug.Log($"[IPC] Place command received - Success: {success}");
+                    break;
+
+                default:
+                    Debug.LogWarning($"[IPC] Unknown gripper command: {gripperMsg.command}");
+                    break;
+            }
+
+            // 결과를 WPF로 전송
+            if (success)
+            {
+                SendGripperStatus(gripper);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[IPC] ParseGripperCommand error: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 현재 그리퍼 상태를 WPF로 전송
+    /// </summary>
+    public void SendGripperStatus(GripperController gripperController)
+    {
+        if (gripperController == null || _writer == null || !_isRunning)
+            return;
+
+        try
+        {
+            var status = new GripperStatusMessage
+            {
+                type = "gripper_status",
+                isGripping = gripperController.IsGripping,
+                objectName = gripperController.GrippedObject != null
+                    ? gripperController.GrippedObject.name
+                    : "",
+                timestamp = DateTime.Now.ToString("o")
+            };
+
+            string json = JsonUtility.ToJson(status);
+            _writer.WriteLine(json);
+
+            Debug.Log($"[IPC] Gripper status sent: IsGripping={status.isGripping}, Object={status.objectName}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[IPC] SendGripperStatus error: {ex.Message}");
+        }
+    }
+
     void OnDestroy()
     {
         _cancellationTokenSource?.Cancel();
@@ -492,6 +574,25 @@ public class IPCReceiver : MonoBehaviour
         public string source;        // "XAxis", "YAxis", etc.
         public string errorType;     // "Error", "Warning", etc.
         public string message;
+        public string timestamp;
+    }
+
+    // ===== 그리퍼 관련 데이터 클래스 =====
+
+    [Serializable]
+    private class GripperCommandMessage
+    {
+        public string type;      // "gripper_command"
+        public string command;   // "pick" or "place"
+        public string timestamp;
+    }
+
+    [Serializable]
+    private class GripperStatusMessage
+    {
+        public string type;        // "gripper_status"
+        public bool isGripping;    // 그리퍼 상태
+        public string objectName;  // 잡고 있는 물체 이름
         public string timestamp;
     }
 }

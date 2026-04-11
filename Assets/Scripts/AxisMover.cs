@@ -3,6 +3,7 @@ using UnityEngine;
 public class AxisMover : MonoBehaviour
 {
     public PickAndPlaceController controller;
+    public GripperController gripper;
 
     public float speed = 100f; // mm/s 단위
 
@@ -104,6 +105,39 @@ public class AxisMover : MonoBehaviour
             IPCReceiver.Instance?.SendAxisData(0f, 0f, 0f);
 
             ErrorManager.Instance?.ClearAllErrors();
+        }
+
+        // ========== 그리퍼 제어 ==========
+        if (gripper == null) return;
+
+        // G키: 집기 (Pick)
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            bool success = gripper.Pick();
+            if (success)
+            {
+                Debug.Log("[Input] Pick successful!");
+                IPCReceiver.Instance?.SendGripperStatus(gripper);
+            }
+            else
+            {
+                Debug.Log("[Input] Pick failed!");
+            }
+        }
+
+        // R키: 놓기 (Release/Place)
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            bool success = gripper.Place();
+            if (success)
+            {
+                Debug.Log("[Input] Place successful!");
+                IPCReceiver.Instance?.SendGripperStatus(gripper);
+            }
+            else
+            {
+                Debug.Log("[Input] Place failed!");
+            }
         }
     }
 }
