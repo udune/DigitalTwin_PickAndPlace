@@ -1,0 +1,95 @@
+/* ============================================
+   Common.uss - 공통 스타일 정의
+   ============================================ */
+
+/* === 루트 변수 정의 === */
+:root {
+    /* 폰트 */
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/Pretendard-Regular%20SDF.otf");
+    font-size: 14px;
+    color: #FFFFFF;
+
+    /* 색상 변수 */
+    --color-normal: rgb(26, 95, 31);
+    --color-warning: rgb(245, 128, 23);
+    --color-error: rgb(184, 28, 28);
+    --color-resolved: rgb(102, 102, 102);
+
+    --color-connected: rgb(26, 179, 51);
+    --color-connecting: rgb(230, 179, 26);
+    --color-disconnected: rgb(179, 51, 51);
+
+    --color-background: rgb(30, 30, 30);
+    --color-panel: rgba(20, 20, 20, 0.95);
+    --color-border: rgb(60, 60, 60);
+    --color-text-secondary: rgb(136, 136, 136);
+}
+
+/* === 공통 트랜지션 === */
+.fade-transition {
+    transition: opacity 0.3s ease-out;
+}
+
+.slide-transition {
+    transition: translate 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+/* === 숨김 클래스 === */
+.hidden {
+    display: none;
+}
+
+.invisible {
+    opacity: 0;
+}
+
+.visible {
+    opacity: 1;
+}
+
+/* === 버튼 공통 스타일 === */
+.button {
+    background-color: rgb(60, 60, 60);
+    border-width: 1px;
+    border-color: rgb(80, 80, 80);
+    border-radius: 4px;
+    padding: 6px 12px;
+    color: #FFFFFF;
+    -unity-font-style: normal;
+    transition: background-color 0.15s ease-out;
+}
+
+.button:hover {
+    background-color: rgb(80, 80, 80);
+}
+
+.button:active {
+    background-color: rgb(50, 50, 50);
+}
+
+/* === 스크롤뷰 공통 스타일 === */
+.unity-scroll-view {
+    background-color: transparent;
+}
+
+.unity-scroll-view__content-container {
+    padding: 0;
+}
+
+.unity-scroller--vertical {
+    width: 8px;
+}
+
+.unity-scroller--vertical .unity-base-slider__tracker {
+    background-color: rgb(40, 40, 40);
+    border-radius: 4px;
+}
+
+.unity-scroller--vertical .unity-base-slider__dragger {
+    background-color: rgb(100, 100, 100);
+    border-radius: 4px;
+}
+
+.unity-scroller--vertical .unity-base-slider__dragger:hover {
+    background-color: rgb(120, 120, 120);
+}

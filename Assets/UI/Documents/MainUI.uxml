@@ -1,0 +1,36 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <!-- 스타일시트 참조 -->
+    <Style src="../Styles/Common.uss" />
+    <Style src="../Styles/StatusBar.uss" />
+    <Style src="../Styles/ConnectionStatus.uss" />
+    <Style src="../Styles/ErrorPanel.uss" />
+
+    <!-- 루트 컨테이너 -->
+    <ui:VisualElement name="root" style="flex-grow: 1;">
+
+        <!-- 상단 상태 표시줄 -->
+        <ui:VisualElement name="status-bar" class="status-bar">
+            <ui:VisualElement name="status-icon" class="status-icon" />
+            <ui:Label name="status-text" text="SYSTEM NORMAL" class="status-text" />
+        </ui:VisualElement>
+
+        <!-- 연결 상태 (우측 상단) -->
+        <ui:VisualElement name="connection-status" class="connection-status">
+            <ui:VisualElement name="connection-indicator" class="connection-indicator disconnected" />
+            <ui:Label name="connection-status-text" text="DISCONNECTED" class="connection-status-text" />
+            <ui:Button name="reconnect-button" text="Reconnect" class="reconnect-button" />
+        </ui:VisualElement>
+
+        <!-- 에러 패널 (좌측) -->
+        <ui:VisualElement name="error-panel" class="error-panel">
+            <ui:VisualElement name="error-panel-header" class="error-panel-header">
+                <ui:Label name="error-panel-title" text="System Alerts" class="error-panel-title" />
+                <ui:Button name="clear-history-button" text="Clear History" class="clear-history-button" />
+            </ui:VisualElement>
+            <ui:ScrollView name="error-scroll" class="error-scroll">
+                <ui:VisualElement name="error-container" class="error-container" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

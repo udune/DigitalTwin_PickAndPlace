@@ -1,0 +1,37 @@
+/* ============================================
+   StatusBar.uss - 상단 상태 표시줄 스타일
+   ============================================ */
+
+.status-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 16px;
+    background-color: var(--color-normal);
+    transition: background-color 0.3s ease-out;
+}
+
+.status-bar.warning {
+    background-color: var(--color-warning);
+}
+
+.status-bar.error {
+    background-color: var(--color-error);
+}
+
+.status-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 9px;
+}
+
+.status-text {
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/NotoSansKR-Bold%20SDF.otf");
+    font-size: 15px;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    letter-spacing: 2px;
+}

@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="error-item" class="error-item">
+        <ui:VisualElement name="error-border" class="error-border" />
+        <ui:VisualElement name="error-content" class="error-content">
+            <ui:VisualElement name="error-header" class="error-header">
+                <ui:VisualElement style="flex-direction: row; align-items: center; flex-grow: 1;">
+                    <ui:VisualElement name="error-badge" class="error-badge">
+                        <ui:Label name="error-badge-text" text="ERROR" class="error-badge-text" />
+                    </ui:VisualElement>
+                    <ui:Label name="error-location" text="Location" class="error-location" />
+                </ui:VisualElement>
+                <ui:Label name="error-timestamp" text="00:00:00" class="error-timestamp" />
+            </ui:VisualElement>
+            <ui:Label name="error-message" text="Error message" class="error-message" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

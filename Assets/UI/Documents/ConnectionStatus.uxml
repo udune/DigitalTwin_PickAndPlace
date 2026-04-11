@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="connection-status" class="connection-status">
+        <ui:VisualElement name="connection-indicator" class="connection-indicator disconnected" />
+        <ui:Label name="connection-status-text" text="DISCONNECTED" class="connection-status-text" />
+        <ui:Button name="reconnect-button" text="Reconnect" class="reconnect-button" />
+    </ui:VisualElement>
+</ui:UXML>

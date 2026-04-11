@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="error-panel" class="error-panel">
+        <ui:VisualElement name="error-panel-header" class="error-panel-header">
+            <ui:Label name="error-panel-title" text="System Alerts" class="error-panel-title" />
+            <ui:Button name="clear-history-button" text="Clear History" class="clear-history-button" />
+        </ui:VisualElement>
+        <ui:ScrollView name="error-scroll" class="error-scroll">
+            <ui:VisualElement name="error-container" class="error-container" />
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

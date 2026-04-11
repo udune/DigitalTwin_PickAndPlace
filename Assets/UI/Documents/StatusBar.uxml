@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="status-bar" class="status-bar">
+        <ui:VisualElement name="status-icon" class="status-icon" />
+        <ui:Label name="status-text" text="SYSTEM NORMAL" class="status-text" />
+    </ui:VisualElement>
+</ui:UXML>
