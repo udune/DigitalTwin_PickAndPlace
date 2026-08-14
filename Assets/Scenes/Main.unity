@@ -800,12 +800,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0868a315d3a09d4448c6c474ee4405e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ErrorVisualizer
-  mainCamera: {fileID: 1858901499}
   errorCamera: {fileID: 448662392}
+  defaultPriority: 5
+  focusPriority: 20
   xAxis: {fileID: 1402731026214527552}
   yAxis: {fileID: 1402731026214527551}
   zAxis: {fileID: 1402731026214527550}
   cameraOffset: {x: 0.5, y: 0.3, z: 0.5}
+  markerMaterial: {fileID: 2100000, guid: a9e2e8758b6d6dd44948086ea6d5705c, type: 2}
+  markerScale: 0.2
+  markerHeight: 0.3
+  labelScale: 0.05
+  errorColor: {r: 1, g: 0.1, b: 0.1, a: 1}
+  warningColor: {r: 1, g: 0.55, b: 0, a: 1}
+  errorBlinkSpeed: 16
+  warningBlinkSpeed: 6
 --- !u!1 &1430930516
 GameObject:
   m_ObjectHideFlags: 0

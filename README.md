@@ -27,8 +27,8 @@
 오류 발생 시 다음이 동시에 일어납니다.
 
 - **카메라 자동 전환** — 오류 카메라 Priority를 5 → 20으로 올려 메인 카메라를 밀어냅니다. 위치는 해당 축 Transform에 오프셋을 더해 실시간 산출하므로, 축이 움직이는 중에도 계속 추적합니다.
-- **경고 구체 생성** — 오류 지점에 회전 + 스케일 펄스(`RotateAndPulse`) 효과가 붙은 마커를 배치
-- **부품 강조** — 해당 축 머티리얼을 빨간색으로 깜빡이고 Emission 발광 적용
+- **경고 구체 생성** — 오류 지점 위에 스케일 펄스(`RotateAndPulse`) 효과가 붙은 마커를 배치. 축마다 1개씩 미리 만들어 두고 켜고 끄므로 런타임 할당이 없습니다
+- **부품 강조** — 해당 축 렌더러를 `MaterialPropertyBlock`으로 빨갛게 깜빡임(머티리얼 교체 없음, 해제 시 완전 원복). 축이 X ⊃ Y ⊃ Z로 중첩돼 있으므로 **하위 축 부품은 제외**해 문제 축만 강조합니다. 머티리얼에 Emission이 켜져 있으면 발광까지 함께 적용
 - **빌보드 라벨** — 오류 메시지가 항상 카메라를 향하도록 (`BillBoard`)
 - 오류 해제 시 메인 카메라로 자동 복귀
 
@@ -144,7 +144,7 @@ PickAndPlaceMachine
 
 | 항목 | 버전 |
 |---|---|
-| Unity | 6000.4.0f1 |
+| Unity | 6000.4.2f1 |
 | 렌더 파이프라인 | URP 17.4.0 |
 | 카메라 | Cinemachine 3.1.6 |
 | UI | UI Toolkit (UXML / USS) |
@@ -158,7 +158,7 @@ PickAndPlaceMachine
 git clone https://github.com/udune/DigitalTwin_PickAndPlace.git
 ```
 
-Unity Hub에서 6000.4.0f1로 열고 `Assets/Scenes/Main.unity`를 실행합니다.
+Unity Hub에서 6000.4.2f1로 열고 `Assets/Scenes/Main.unity`를 실행합니다.
 
 Dashboard와 연동하려면 **WPF 앱을 먼저 실행하고 `▶ START`를 누른 뒤** Unity를 재생하세요. 순서가 반대여도 3초 간격 재연결로 결국 붙지만, 초기 연결이 빠릅니다. Dashboard 없이 단독 실행해도 키보드 조작과 로컬 오류 판정은 동작합니다.
 
@@ -172,12 +172,13 @@ Assets/
 │   ├── IPCReceiver.cs              Named Pipe 클라이언트 + 프로토콜
 │   ├── PickAndPlaceController.cs   축 Transform 보간
 │   ├── AxisMover.cs                키보드 입력
-│   ├── ErrorVisualizer.cs          Cinemachine 오류 포커싱
+│   ├── ErrorVisualizer.cs          오류 시각화 조정자 (카메라 + 마커 + 부품 강조)
 │   ├── BillBoard.cs / RotateAndPulse.cs
 │   ├── UnityMainThreadDispatcher.cs
 │   ├── Core/GripperController.cs
 │   ├── Interaction/PickableObject.cs
 │   ├── Error/                      ErrorManager, ErrorConditionMonitor, ErrorData
+│   │                               ErrorMarker(경고 구체+라벨), ErrorHighlighter(부품 깜빡임)
 │   └── UI/MainUIController.cs      + 3개 서브 컨트롤러
 ├── UI/
 │   ├── Documents/                  UXML 5종
