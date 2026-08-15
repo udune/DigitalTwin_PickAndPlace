@@ -15,6 +15,14 @@ public class ErrorMarker : MonoBehaviour
 
     private const float EmissionIntensity = 4f;
 
+    // 라벨용 Pretendard 폰트. 마커를 코드로 생성하므로 인스펙터 연결 없이 Resources에서 직접 불러온다.
+    // 경로는 "Assets/TextMesh Pro/Resources/" 기준 상대 경로이며 확장자는 생략한다.
+    // 애셋명 끝에 "SDF"가 두 번 붙는 것은 원본 폰트 파일 이름(Pretendard-Regular SDF.otf)에
+    // 이미 SDF가 들어 있는 상태로 폰트 애셋이 생성됐기 때문이다.
+    private const string LabelFontPath = "Fonts & Materials/Pretendard-Regular SDF SDF";
+
+    private static TMP_FontAsset _labelFont;
+
     private Renderer _sphereRenderer;
     private TMP_Text _label;
     private MaterialPropertyBlock _block;
@@ -56,6 +64,13 @@ public class ErrorMarker : MonoBehaviour
         labelObject.transform.localScale = Vector3.one * labelScale;
 
         TextMeshPro label = labelObject.AddComponent<TextMeshPro>();
+
+        TMP_FontAsset labelFont = GetLabelFont();
+        if (labelFont != null)
+        {
+            label.font = labelFont;
+        }
+
         label.alignment = TextAlignmentOptions.Center;
         label.fontSize = 6f;
         label.rectTransform.sizeDelta = new Vector2(14f, 8f);
@@ -66,6 +81,25 @@ public class ErrorMarker : MonoBehaviour
 
         root.SetActive(false);
         return marker;
+    }
+
+    /// <summary>
+    /// 라벨 폰트를 한 번만 로드해 캐싱한다. 축 개수만큼 Create가 호출되므로 중복 로드를 피한다.
+    /// 로드에 실패하면 null을 돌려주고 TMP 기본 폰트를 그대로 쓴다.
+    /// </summary>
+    private static TMP_FontAsset GetLabelFont()
+    {
+        if (_labelFont == null)
+        {
+            _labelFont = Resources.Load<TMP_FontAsset>(LabelFontPath);
+
+            if (_labelFont == null)
+            {
+                Debug.LogWarning($"[ErrorMarker] 라벨 폰트를 찾을 수 없다: {LabelFontPath}. TMP 기본 폰트로 대체한다.");
+            }
+        }
+
+        return _labelFont;
     }
 
     public void Show(ErrorInfo errorInfo, Color color)
