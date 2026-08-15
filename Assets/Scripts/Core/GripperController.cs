@@ -229,7 +229,10 @@ public class GripperController : MonoBehaviour
     /// </summary>
     private GameObject FindNearestByComponent()
     {
-        PickableObject[] pickables = FindObjectsByType<PickableObject>(FindObjectsSortMode.None);
+        // 정렬 순서는 지정하지 않는다. 아래에서 거리로 최근접을 고르므로 순서가 의미 없고,
+        // Unity 6000.4부터 FindObjectsSortMode를 받는 오버로드가 Obsolete가 됐다.
+        // 인자 없는 오버로드는 비활성 오브젝트를 제외한다(FindObjectsInactive.Exclude와 동일).
+        PickableObject[] pickables = FindObjectsByType<PickableObject>();
 
         GameObject nearest = null;
         float minDistance = float.MaxValue;
