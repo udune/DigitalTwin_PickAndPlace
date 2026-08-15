@@ -66,9 +66,9 @@ public class PickAndPlaceController : MonoBehaviour
                 Debug.LogWarning($"[Controller] 좌표가 안전 범위(±{limit}mm)를 벗어나 잘렸다: ({x}, {y}, {z})");
             }
 
-            x = Mathf.Clamp(x, -limit, limit);
-            y = Mathf.Clamp(y, -limit, limit);
-            z = Mathf.Clamp(z, -limit, limit);
+            x = ClampToLimit(x);
+            y = ClampToLimit(y);
+            z = ClampToLimit(z);
         }
 
         _limitWarned = outOfRange;
@@ -81,10 +81,21 @@ public class PickAndPlaceController : MonoBehaviour
     }
 
     /// <summary>
+    /// 좌표 하나를 안전 범위(±positionLimitMm) 안으로 자른다.
+    /// 좌표 유효성의 기준을 이 컴포넌트 한 곳에 두기 위해 공개한다(AxisMover가 재사용).
+    /// NaN은 비교가 전부 false라 Clamp로 걸러지지 않으므로 IsFinite로 따로 확인해야 한다.
+    /// </summary>
+    public float ClampToLimit(float valueMm)
+    {
+        float limit = Mathf.Abs(positionLimitMm);
+        return Mathf.Clamp(valueMm, -limit, limit);
+    }
+
+    /// <summary>
     /// NaN도 무한대도 아닌 정상적인 실수인지 확인한다.
     /// float.IsFinite는 API 호환성 레벨에 따라 없을 수 있어 직접 구현한다.
     /// </summary>
-    private static bool IsFinite(float value)
+    public static bool IsFinite(float value)
     {
         return !float.IsNaN(value) && !float.IsInfinity(value);
     }

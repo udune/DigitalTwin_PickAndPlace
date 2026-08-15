@@ -35,10 +35,41 @@ public class AxisMover : MonoBehaviour
 
     private void OnWpfAxisDataReceived(float x, float y, float z)
     {
+        // NaN이 누적값에 한 번 들어오면 이후 모든 덧셈이 NaN이 되어 축이 영구히 멈춘다
+        // (컨트롤러가 NaN을 계속 거부하므로 키를 눌러도 반응이 없다).
+        // 컨트롤러와 동일한 기준으로 통째로 무시한다.
+        if (!PickAndPlaceController.IsFinite(x)
+            || !PickAndPlaceController.IsFinite(y)
+            || !PickAndPlaceController.IsFinite(z))
+        {
+            Debug.LogWarning($"[Input] 유효하지 않은 좌표를 무시한다: ({x}, {y}, {z})");
+            return;
+        }
+
         // WPF에서 받은 값으로 현재 위치 동기화
         currentX = x;
         currentY = y;
         currentZ = z;
+
+        ClampToControllerLimit();
+    }
+
+    /// <summary>
+    /// 누적 좌표를 컨트롤러의 안전 범위 안으로 자른다.
+    /// 컨트롤러가 값을 잘라도 여기 누적값이 계속 자라면 두 값이 어긋나서,
+    /// 되돌아올 때 그만큼 키를 더 눌러야 축이 다시 움직인다.
+    /// 상한은 컨트롤러를 단일 기준으로 삼아 중복 정의하지 않는다.
+    /// </summary>
+    private void ClampToControllerLimit()
+    {
+        if (controller == null)
+        {
+            return;
+        }
+
+        currentX = controller.ClampToLimit(currentX);
+        currentY = controller.ClampToLimit(currentY);
+        currentZ = controller.ClampToLimit(currentZ);
     }
 
     void Update()
@@ -88,6 +119,10 @@ public class AxisMover : MonoBehaviour
 
         if (moved)
         {
+            // 컨트롤러에 넘기기 전에 누적값 자체를 자른다.
+            // WPF로도 잘린 값이 나가야 두 프로세스가 같은 위치를 보게 된다.
+            ClampToControllerLimit();
+
             controller.MoveToPosition(currentX, currentY, currentZ);
 
             // WPF로 전송
