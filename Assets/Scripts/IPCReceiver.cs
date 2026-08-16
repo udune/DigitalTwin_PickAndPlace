@@ -288,7 +288,11 @@ public class IPCReceiver : MonoBehaviour
                 case "error":
                     ParseErrorMessage(json);
                     break;
-                    
+
+                case "error_clear":
+                    ParseErrorClear(json);
+                    break;
+
                 case "clear_all_errors":
                     if (ErrorManager.Instance != null)
                     {
@@ -383,26 +387,41 @@ public class IPCReceiver : MonoBehaviour
         {
             var errorMsg = JsonUtility.FromJson<ErrorMessage>(json);
 
+            // code는 Dashboard가 정하는 오류 식별자이자 error_clear가 지목할 키다.
+            // 없으면 해제할 방법이 없으므로 받지 않는다.
+            if (string.IsNullOrEmpty(errorMsg.code))
+            {
+                Debug.LogWarning($"[IPC] Received error without code. Ignoring. Message: {errorMsg.message}");
+                return;
+            }
+
             // source 유효성 검사: 빈 source는 에러 추적 및 해제가 불가능하므로 무시
             if (string.IsNullOrEmpty(errorMsg.source))
             {
-                Debug.LogWarning($"[IPC] Received error with empty source. Ignoring. Message: {errorMsg.message}");
+                Debug.LogWarning($"[IPC] Received error with empty source. Ignoring. Code: {errorMsg.code}");
+                return;
+            }
+
+            // 모르는 값을 기본값으로 삼키면 엉뚱한 축에 오류가 붙는다. 반드시 거르고 알린다.
+            if (!TryParseErrorSource(errorMsg.source, out ErrorSource source))
+            {
+                Debug.LogWarning($"[IPC] Unknown error source '{errorMsg.source}'. Ignoring. Code: {errorMsg.code}");
+                return;
+            }
+
+            if (!TryParseErrorType(errorMsg.errorType, out ErrorType type))
+            {
+                Debug.LogWarning($"[IPC] Unknown error type '{errorMsg.errorType}'. Ignoring. Code: {errorMsg.code}");
                 return;
             }
 
             if (ErrorManager.Instance != null)
             {
-                // 문자열을 Enum으로 변환
-                ErrorSource source = ParseErrorSource(errorMsg.source);
-                ErrorType type = ParseErrorType(errorMsg.errorType);
-
-                // ErrorInfo 구조체에 파싱된 데이터 설정
-                // ErrorConditionMonitor와 동일한 패턴으로 고정 ID 사용
-                string errorId = $"{errorMsg.source}_{errorMsg.errorType}";
-
                 ErrorInfo info = new ErrorInfo
                 {
-                    Id = errorId,
+                    // Dashboard의 code를 그대로 Id로 쓴다. 같은 사건에 양쪽이 각각 Id를
+                    // 만들면 오류 하나가 목록에 두 줄로 남는다.
+                    Id = errorMsg.code,
                     Type = type,
                     Source = source,
                     Location = errorMsg.source,
@@ -412,7 +431,7 @@ public class IPCReceiver : MonoBehaviour
 
                 ErrorManager.Instance.RaiseError(info);
 
-                Debug.Log($"[IPC] Error raised: {source} - {type} - {errorMsg.message}");
+                Debug.Log($"[IPC] Error raised: {errorMsg.code} - {source} - {type} - {errorMsg.message}");
             }
         }
         catch (Exception ex)
@@ -420,26 +439,54 @@ public class IPCReceiver : MonoBehaviour
             Debug.LogError($"[IPC] ParseErrorMessage error: {ex.Message}");
         }
     }
-    
-    private ErrorSource ParseErrorSource(string source)
+
+    /// <summary>
+    /// Dashboard가 조건 해소를 알려오면 해당 오류 하나만 거둔다.
+    /// </summary>
+    private void ParseErrorClear(string json)
     {
-        return source switch
+        try
         {
-            "XAxis" => ErrorSource.XAxis,
-            "YAxis" => ErrorSource.YAxis,
-            "ZAxis" => ErrorSource.ZAxis,
-            _ => ErrorSource.XAxis
-        };
+            var clearMsg = JsonUtility.FromJson<ErrorClearMessage>(json);
+
+            if (string.IsNullOrEmpty(clearMsg.code))
+            {
+                Debug.LogWarning("[IPC] Received error_clear without code. Ignoring.");
+                return;
+            }
+
+            if (ErrorManager.Instance != null)
+            {
+                ErrorManager.Instance.ClearError(clearMsg.code);
+                Debug.Log($"[IPC] Error cleared: {clearMsg.code}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[IPC] ParseErrorClear error: {ex.Message}");
+        }
     }
-    
-    private ErrorType ParseErrorType(string type)
+
+    private bool TryParseErrorSource(string source, out ErrorSource result)
     {
-        return type switch
+        switch (source)
         {
-            "Error" => ErrorType.Error,
-            "Warning" => ErrorType.Warning,
-            _ => ErrorType.Error
-        };
+            case "XAxis": result = ErrorSource.XAxis; return true;
+            case "YAxis": result = ErrorSource.YAxis; return true;
+            case "ZAxis": result = ErrorSource.ZAxis; return true;
+            case "System": result = ErrorSource.System; return true;
+            default: result = default; return false;
+        }
+    }
+
+    private bool TryParseErrorType(string type, out ErrorType result)
+    {
+        switch (type)
+        {
+            case "Error": result = ErrorType.Error; return true;
+            case "Warning": result = ErrorType.Warning; return true;
+            default: result = default; return false;
+        }
     }
 
     /// <summary>
@@ -571,9 +618,18 @@ public class IPCReceiver : MonoBehaviour
     private class ErrorMessage
     {
         public string type;
-        public string source;        // "XAxis", "YAxis", etc.
-        public string errorType;     // "Error", "Warning", etc.
+        public string code;          // "X_LIMIT" 등 — 오류 식별자(ErrorInfo.Id)
+        public string source;        // "XAxis", "YAxis", "ZAxis", "System"
+        public string errorType;     // "Error", "Warning"
         public string message;
+        public string timestamp;
+    }
+
+    [Serializable]
+    private class ErrorClearMessage
+    {
+        public string type;          // "error_clear"
+        public string code;          // 해제할 오류의 code
         public string timestamp;
     }
 
