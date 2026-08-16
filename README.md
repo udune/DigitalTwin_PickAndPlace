@@ -6,6 +6,27 @@
 
 Dashboard(WPF) 쪽이 100Hz 제어 루프를 돌리면서 SLMP 3E / OPC UA로 값을 내보내는 두뇌 역할이고, 이 저장소의 Unity는 그걸 그려주는 눈 역할입니다. 둘 사이는 `DigitalTwinPipe`라는 이름의 파이프 하나로 줄 단위 JSON을 주고받습니다.
 
+```mermaid
+flowchart LR
+    subgraph DASH["DigitalTwin.Dashboard (Soft-PLC)"]
+        LOOP["100Hz 제어 루프"]
+        PROTO["SLMP 3E / OPC UA"]
+    end
+
+    subgraph PNP["DigitalTwin_PickAndPlace (3D Viewer)"]
+        RECV["IPCReceiver"]
+        CTRL["PickAndPlaceController<br/>축 동기화"]
+        VIS["ErrorVisualizer<br/>오류 시각화"]
+    end
+
+    LOOP <-->|"Named Pipe · JSON<br/>DigitalTwinPipe"| RECV
+    RECV --> CTRL
+    RECV --> VIS
+
+    style DASH fill:#1f3a5f,stroke:#4a9eff,color:#fff
+    style PNP fill:#3d2f1f,stroke:#d4913a,color:#fff
+```
+
 ## 오류 시각화
 
 가장 공들인 부분입니다. 오류 하나가 들어오면 네 가지가 동시에 일어납니다.
@@ -76,6 +97,27 @@ Dashboard가 `error`로 보내는 `code`(`X_LIMIT`, `Z_SAFE_HEIGHT`, `X_OVERSPEE
 단독 실행 시 판정 기준은 축별 min/max를 인스펙터에서 설정하는 방식입니다(Unity unit 기준). 범위를 벗어나면 `Error`, 바깥 15% 구간에 들어가면 `Warning`(`warningThreshold` 0.85)이고 우선순위는 Error > Warning > Normal입니다.
 
 `disableWhenDashboardConnected`를 끄면 로컬 판정을 강제로 켜 둘 수 있긴 한데, 그러면 위에 적은 중복 문제가 그대로 돌아옵니다.
+
+```mermaid
+flowchart TD
+    DASH["Dashboard<br/>error 메시지"]
+    LOCAL["ErrorConditionMonitor<br/>자체 경계 판정"]
+
+    EM[("ErrorManager<br/>errorDict — ID로 중복 제거")]
+
+    DASH -->|"IPCReceiver 수신<br/>ID: XAxis_Error"| EM
+    LOCAL -->|"ID: XAxis_Limit"| EM
+
+    EM -->|ErrorRaisedAction| EV["ErrorVisualizer<br/>3D 표현 조정자"]
+    EM -->|ErrorRaisedAction| UI["MainUIController<br/>HUD 오류 목록"]
+
+    EV --> CAM["Cinemachine<br/>Priority 5 → 20"]
+    EV --> MK["ErrorMarker<br/>경고 구체 + 빌보드 라벨"]
+    EV --> HL["ErrorHighlighter<br/>부품 깜빡임 + Emission"]
+
+    style EM fill:#1f3a5f,stroke:#4a9eff,stroke-width:3px,color:#fff
+    style EV fill:#3d2f1f,stroke:#d4913a,color:#fff
+```
 
 ## 3D 모델
 
