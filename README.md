@@ -1,3 +1,5 @@
+<img width="800" height="245" alt="Image" src="https://github.com/user-attachments/assets/fd2aff44-3e68-46ad-b0a9-2533a6379176" />
+
 # DigitalTwin_PickAndPlace
 
 픽앤플레이스 장비의 3D 디지털 트윈 뷰어입니다. Named Pipe로 [DigitalTwin.Dashboard](https://github.com/udune/DigitalTwin.Dashboard)(Soft-PLC)에 붙어서 3축 위치를 실시간으로 따라가고, 오류가 나면 카메라가 알아서 그 부위를 잡아줍니다.
